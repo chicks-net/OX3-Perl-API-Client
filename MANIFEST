@@ -1,3 +1,6 @@
+bin
+bin/ox3-timezones
+bin/ox3-currencies
 Changes
 MANIFEST
 Makefile.PL
