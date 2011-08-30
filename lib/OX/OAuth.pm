@@ -19,11 +19,11 @@ OX::OAuth - use OpenX's OAuth login mechanism
 
 =head1 VERSION
 
-Version 0.51
+Version 0.52
 
 =cut
 
-our $VERSION = '0.51';
+our $VERSION = '0.52';
 
 
 =head1 SYNOPSIS
@@ -388,6 +388,8 @@ sub rest {
 	} elsif (defined $method) {
 		if ($method eq 'PUT') {
 			$response = $ua->request(PUT $url);
+		} elsif ($method eq 'DELETE') {
+			$response = $ua->request(DELETE $url);
 		} # TODO: more options?
 	} elsif (defined $post_args) {
 		$response = $ua->post($url,$post_args);
@@ -497,98 +499,3 @@ See http://dev.perl.org/licenses/ for more information.
 1; # End of OX::OAuth
 
 __END__
-
-
-
-# make a rest post or get call and deal with errors
-sub rest {
-	my ($args) = @_;
-
-	# read arguments
-	my $url = $args->{url};
-	die "bad url: $url" unless $url =~ qr{^https?://};
-	my $success = $args->{success};
-	$success = "$url succeeded" unless defined $success;
-	my $post_args = $args->{post_args};
-	my $method = $args->{method};
-	my $debug = $args->{debug} || 0;
-
-	my $decode_json = 1;
-	$decode_json = $args->{decode_json} if defined $args->{decode_json};
-
-	my $upload_file = $args->{upload_file};
-	my $upload_file_field = $args->{upload_file_field};
-
-	# web hit
-	my $response;
-	if (defined $upload_file) {
-		die "no field name" unless length $upload_file_field;
-		die "no file name" unless length $upload_file;
-		die "file '$upload_file' does not exist" unless -f $upload_file;
-		$response = $ua->post($url,
-			Content_Type => 'form-data',
-			Content => [
-				%$post_args,
-				$upload_file_field => [ $upload_file ],
-			]
-		);
-	} elsif (defined $method) {
-		if ($method eq 'PUT') {
-			$response = $ua->request(PUT $url);
-		} # TODO: more options?
-	} elsif (defined $post_args) {
-#		warn "post $url";
-		$response = $ua->post($url,$post_args);
-	} else {
-#		warn "get $url";
-		$response = $ua->get($url);
-	}
-
-	# how did it go?
-	if ($response->is_success) { # TODO: log this as well
-		my $content = $response->content;
-
-		if ($debug) {
-			print "success would be: $success\n";
-			print "url: $url\n";
-			print "sent: " . Dumper($post_args) . "\n";
-			print "status line: " .  $response->status_line . "\n";
-			print "content: $content\n";
-			jsondump($content);
-			die "debug";
-		}
-		my $href;
-		if ($decode_json) {
-			$href = jsondecode($content);
-		} else {
-			$href = {
-				content => $content,
-				status_line => $response->status_line,
-			}
-		}
-		if ( ref($href) eq 'HASH' and defined $href->{id} ) {
-			print "$success id " . $href->{id} . "\n";
-		} else {
-			print "$success\n" if length $success;
-		}
-		return $href;
-	} else {
-		die "$url failed: " . $response->status_line . "\n" . $response->content . "\nsent:" . Dumper($post_args);
-	}
-}
-
-# decode JSON into perl structure
-sub jsondecode {
-	my ($content) = @_;
-#	print "### $content\n";
-	my $json = new JSON;
-	my $json_text = $json->allow_nonref->utf8->relaxed->escape_slash->loose->allow_singlequote->allow_barekey->decode($content);
-	return $json_text;
-}
-
-# turn JSON into human readable output
-sub jsondump {
-	my($content) = @_;
-	my $json_text = jsondecode($content);
-	print Dumper($json_text);
-}

@@ -1,5 +1,9 @@
 Revision history for OX-OAuth
 
+0.52	30 Aug 2011 1655 PST
+- allow PUT and POST methods in rest()
+- get rid of pasted code after __END__
+
 0.51	30 Aug 2011 1545 PST
 - add validate to login()
 - put the cookie header in so things actually work
