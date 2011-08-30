@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+
+# TODO: pod
+
+use warnings;
+use strict;
+
+use Data::Dumper;
+use JSON -support_by_pp;
+use File::Slurp;
+use OX::OAuth;
+
+# command line arguments
+#my ($search) = @ARGV;
+
+# config from file
+my $configfile = $ENV{OX3AUTH} || $ENV{HOME} . '/.ox3auth';
+my $config = jsondecode(read_file($configfile));
+#jsondump(read_file($configfile));
+
+my $oauth = OX::OAuth->new($config); # create oauth object based on config file parameters
+if ($oauth->login(0)) { # attempt to login (1=verbosely)
+	my $token = $oauth->token;
+	# do something with $token
+	print "your ox3 token is $token, ";
+	print "logged in....\n";
+} else {
+	die $oauth->error; # failure
+}
+
+my $accounts = $oauth->rest({
+	relative_url => "/a/account?limit=10"
+});
+
+print Dumper($accounts);
+
+#foreach my $entry (@$timezones) {
+#	if (defined $search and $entry->{name} !~ /$search/) {
+#		next;
+#	}
+#	print join("\t",$entry->{id},$entry->{name},$entry->{code}), "\n";
+#}
+
+## 
+## SUBroutines
+##
+
+# decode JSON into perl structure
+sub jsondecode {
+	my ($content) = @_;
+#	print "### $content\n";
+	my $json = new JSON;
+	my $json_text = $json->allow_nonref->utf8->relaxed->escape_slash->loose->allow_singlequote->allow_barekey->decode($content);
+	return $json_text;
+}
+
+# turn JSON into human readable output
+sub jsondump {
+	my($content) = @_;
+	my $json_text = jsondecode($content);
+	print Dumper($json_text);
+}
+
+__END__

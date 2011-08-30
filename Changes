@@ -1,5 +1,9 @@
 Revision history for OX-OAuth
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
+0.51	30 Aug 2011 1545 PST
+- add validate to login()
+- put the cookie header in so things actually work
+
+0.50    29 Aug 2011
+- First version, released on an unsuspecting internal world.
 
