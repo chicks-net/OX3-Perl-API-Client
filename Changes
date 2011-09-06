@@ -1,10 +1,17 @@
 Revision history for OX-OAuth
 
-0.52	30 Aug 2011 1655 PST
-- allow PUT and POST methods in rest()
+0.60	5 Sept 2011 20:04 PST
+- fix Changes for 0.52
+- better pod.  well, at least more pod.
+- implement ox3-currencies
+- make rest() un-quiet by default
+- make validate call in login() quiet based on verbosity setting
+
+0.52	30 Aug 2011 16:55 PST
+- allow PUT and DELETE methods in rest()
 - get rid of pasted code after __END__
 
-0.51	30 Aug 2011 1545 PST
+0.51	30 Aug 2011 15:45 PST
 - add validate to login()
 - put the cookie header in so things actually work
 

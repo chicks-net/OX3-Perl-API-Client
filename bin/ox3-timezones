@@ -1,6 +1,28 @@
 #!/usr/bin/perl
 
-# TODO: pod
+=head1 NAME
+
+ox3-timezones - list or search valid currencies
+
+=head1 SYNOPSIS
+
+This code is primarily intended to provide an example of how to use the authentication and API wrapping portions of OX::OAauth.  But you may also find it handy.
+
+If you run the script with an argument it will use that as a regex search.   
+
+=head1 CONFIGURATION
+
+Create a json file with the require paramaters for the API.  Save it as L<~/.ox3auth> or set the L<OX3AUTH> environment variable to point to your file.
+
+For example:
+        { api_url: 'https://prod-console.openx.com/ox/3.0', sso_url: 'https://sso.openx.com/', realm: 'blah_blah_blah', email: 'you@your.com', password: 'sneaky', api_key: 'ffffffffffffffffffffffffffffffffffffffff', api_secret: 'ffffffffffffffffffffffffffffffffffffffff' }
+
+=head1 SEE ALSO
+
+L<OX::OAauth>
+
+=cut
+
 
 use warnings;
 use strict;
@@ -9,6 +31,9 @@ use Data::Dumper;
 use JSON -support_by_pp;
 use File::Slurp;
 use OX::OAuth;
+
+# internal config
+my $verbose = 0;
 
 # command line arguments
 my ($search) = @ARGV;
@@ -19,24 +44,27 @@ my $config = jsondecode(read_file($configfile));
 #jsondump(read_file($configfile));
 
 my $oauth = OX::OAuth->new($config); # create oauth object based on config file parameters
-if ($oauth->login(0)) { # attempt to login (1=verbosely)
+if ($oauth->login($verbose)) { # attempt to login
 	my $token = $oauth->token;
 	# do something with $token
-	print "your ox3 token is $token, ";
-	print "logged in....\n";
+	print "your ox3 token is $token, " if $verbose;
+	print "logged in....\n" if $verbose;
 } else {
 	die $oauth->error; # failure
 }
 
 my $timezones = $oauth->rest({
-	relative_url => "/a/account/timezoneOptions"
+	relative_url => "/a/account/timezoneOptions",
+	quiet => 1-$verbose,
 });
 
 foreach my $entry (@$timezones) {
-	if (defined $search and $entry->{name} !~ /$search/) {
+	if (defined $search and $entry->{name} !~ /$search/i) {
+		# goodbye square peg
 		next;
 	}
-	print join("\t",$entry->{id},$entry->{name},$entry->{code}), "\n";
+	#print join("\t",$entry->{id},$entry->{name},$entry->{code}), "\n";		# simple
+	printf ("%4d %-40s %-40s\n",$entry->{id},$entry->{name},$entry->{code});	# pretty
 }
 
 ## 

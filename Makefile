@@ -17,7 +17,7 @@
 #     LICENSE => q[perl]
 #     NAME => q[OX::OAuth]
 #     PL_FILES => {  }
-#     PREREQ_PM => { Test::More=>q[0], Data::Dumper=>q[0], JSON=>q[0], Net::OAuth=>q[0], Sub::Override=>q[0], HTTP::Request::Common=>q[0] }
+#     PREREQ_PM => { Test::More=>q[0], LWP::UserAgent=>q[0], Data::Dumper=>q[0], JSON=>q[0], Net::OAuth=>q[0], Sub::Override=>q[0], HTTP::Request::Common=>q[0] }
 #     VERSION_FROM => q[lib/OX/OAuth.pm]
 #     clean => { FILES=>q[OX-OAuth-*] }
 #     dist => { COMPRESS=>q[gzip -9f], SUFFIX=>q[gz] }
@@ -59,11 +59,11 @@ DIRFILESEP = /
 DFSEP = $(DIRFILESEP)
 NAME = OX::OAuth
 NAME_SYM = OX_OAuth
-VERSION = 0.01
+VERSION = 0.60
 VERSION_MACRO = VERSION
-VERSION_SYM = 0_01
+VERSION_SYM = 0_60
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 0.01
+XS_VERSION = 0.60
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -257,7 +257,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = OX-OAuth
-DISTVNAME = OX-OAuth-0.01
+DISTVNAME = OX-OAuth-0.60
 
 
 # --- MakeMaker macro section:
@@ -478,7 +478,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
 	$(NOECHO) $(ECHO) '--- #YAML:1.0' > META_new.yml
 	$(NOECHO) $(ECHO) 'name:               OX-OAuth' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version:            0.01' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version:            0.60' >> META_new.yml
 	$(NOECHO) $(ECHO) 'abstract:           use OpenX'\''s OAuth login mechanism' >> META_new.yml
 	$(NOECHO) $(ECHO) 'author:' >> META_new.yml
 	$(NOECHO) $(ECHO) '    - Christopher Hicks <chris.hicks@openx.org>' >> META_new.yml
@@ -492,6 +492,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) '    Data::Dumper:         0' >> META_new.yml
 	$(NOECHO) $(ECHO) '    HTTP::Request::Common:  0' >> META_new.yml
 	$(NOECHO) $(ECHO) '    JSON:                 0' >> META_new.yml
+	$(NOECHO) $(ECHO) '    LWP::UserAgent:       0' >> META_new.yml
 	$(NOECHO) $(ECHO) '    Net::OAuth:           0' >> META_new.yml
 	$(NOECHO) $(ECHO) '    Sub::Override:        0' >> META_new.yml
 	$(NOECHO) $(ECHO) '    Test::More:           0' >> META_new.yml
@@ -793,13 +794,14 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
-	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0.01">' > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0.60">' > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <ABSTRACT>use OpenX'\''s OAuth login mechanism</ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR>Christopher Hicks &lt;chris.hicks@openx.org&gt;</AUTHOR>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <IMPLEMENTATION>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Data::Dumper" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="HTTP::Request::Common" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="JSON::" />' >> $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '        <REQUIRE NAME="LWP::UserAgent" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Net::OAuth" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Sub::Override" />' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '        <REQUIRE NAME="Test::More" />' >> $(DISTNAME).ppd

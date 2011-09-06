@@ -19,11 +19,11 @@ OX::OAuth - use OpenX's OAuth login mechanism
 
 =head1 VERSION
 
-Version 0.52
+Version 0.60
 
 =cut
 
-our $VERSION = '0.52';
+our $VERSION = '0.60';
 
 
 =head1 SYNOPSIS
@@ -56,14 +56,65 @@ For example:
 
 =head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+We don't export anything.  Fear not.
 
 =head1 FUNCTIONS
 
 =head2 new
 
 Create an authentication object.
+
+Arguments are passed as a hashref with these keys:
+
+=over 4
+
+=item * api_url
+
+Required.  Should probably be L<https://prod-console.openx.com/ox/3.0>
+
+=item * sso_url
+
+Required.  Should probably be L<https://sso.openx.com/>
+
+=item * realm
+
+Required.  Provided as part of your Enterprise setup.
+
+=item * email
+
+Required.  The email address of the API user.  All ox3 logins can use the API.
+
+=item * password
+
+Required.  The password of the API user.
+
+=item * api_key
+
+Required.  Provided as part of your Enterprise setup.
+
+=item * api_secret
+
+Required.  Provided as part of your Enterprise setup.
+
+=item * request_token_url
+
+Optional.  This can be inferred from the sso_url.
+
+=item * access_token_url
+
+Optional.  This can be inferred from the sso_url.
+
+=item * authorize_url
+
+Optional.  This can be inferred from the sso_url.
+
+=item * login_url
+
+Optional.  This can be inferred from the sso_url.
+
+=back
+
+Returns an object.
 
 =cut
 
@@ -125,6 +176,8 @@ sub new {
 Attempts to login.
 
 Returns true if you successfully logged.  Returns false if you failed to login for some reason.
+
+The only argument is optional and is a boolean for whether you want it to be verbose during the numerous steps oauth requires.
 
 =cut
 
@@ -277,6 +330,7 @@ sub login {
 		success => 'login validated...',
 		decode_json => 0,
 		method => 'PUT',
+		quiet => 1-$verbose,
 	});
 
 	return 1; # woo hoo, success!
@@ -284,7 +338,7 @@ sub login {
 
 =head2 nonce
 
-This calculates a random base62 string 32 characters long.
+This calculates and returns a random base62 string 32 characters long.
 
 =cut
 
@@ -325,7 +379,7 @@ sub jsondecode {
 
 =head2 jsondump
 
-turn JSON into human readable output
+turn JSON into human readable output and print it out
 
 =cut
 
@@ -337,7 +391,53 @@ sub jsondump {
 
 =head2 rest
 
-Make a call to the REST API.
+Make a call to the REST API.  You can do this for yourself with the token, but then you miss out on all the DWIM syrup this method provides.
+
+Arguments are passed as a hashref with these keys:
+
+=over 4
+
+=item * relative_url
+
+Required.  This is the API call you're trying to make.
+
+=item * url
+
+If you want to provide the entire URL use this instead of relative_url.  That's usually not a good idea.
+
+=item * success
+
+Optional.  A message to print upon success.  If the return value includes an id field, it will be printed also.
+
+=item * post_args
+
+Optional.  If you want to make a POST then you need something to post.  Pass in a hashref here.
+
+=item * method
+
+Optional.  Do you want DELETE or PUT?  You'll need to say so since we can't infer that.  Otherwise you get POST if there stuff in post_args or finally GET.
+
+=item * quiet
+
+Optional.  Off by default so the success message prints.  Do you want the success message to print?
+
+=item * debug
+
+Optional.  Off by default.  Do you want to see the guts of what is happening?
+
+=item * decode_json
+
+Optional.  The default is on: it will decode the json into a Perl structure.  Otherwise you get back a hashref with content and status_line to play with.
+
+=item * upload_file
+
+Optional.  If you're uploading a file, which file?
+
+=item * upload_file_field
+
+Optional.  The name of the field to put the uploaded file in.
+
+=back
 
 =cut
 
@@ -365,6 +465,7 @@ sub rest {
 	my $post_args = $args->{post_args};
 	my $method = $args->{method};
 	my $debug = $args->{debug} || 0;
+	my $quiet = $args->{quiet} || 0;
 
 	my $decode_json = 1;
 	$decode_json = $args->{decode_json} if defined $args->{decode_json};
@@ -416,10 +517,12 @@ sub rest {
 				status_line => $response->status_line,
 			}
 		}
-		if ( ref($href) eq 'HASH' and defined $href->{id} ) {
-			print "$success id " . $href->{id} . "\n";
-		} else {
-			print "$success\n";
+		unless ($quiet) {
+			if ( ref($href) eq 'HASH' and defined $href->{id} ) {
+				print "$success id " . $href->{id} . "\n";
+			} else {
+				print "$success\n";
+			}
 		}
 		return $href;
 	} else {
@@ -471,6 +574,18 @@ L<http://search.cpan.org/dist/OX-OAuth/>
 
 L<http://tools.ietf.org/html/rfc5849>
 
+=item * Net::OAuth module
+
+L<Net::OAuth> which L<OX::OAuth> is mostly a wrapper for.
+
+=item * Sub::Override module
+
+L<Sub::Override> which made dealing with Net::OAuth I<much> easier.  This module saved me a lot of trouble.
+
+=item * JSON module
+
+L<JSON>
+
 =back
 
 
@@ -478,7 +593,9 @@ L<http://tools.ietf.org/html/rfc5849>
 
 =over 4
 
-=item * Keith Miller C<< <keith.miller at openx.com> >>, our OAuth implementor
+=item * Keith Miller, our OAuth implementor
+
+=item * Michael Todd, Operations Manager
 
 =back
 
@@ -488,7 +605,7 @@ L<http://tools.ietf.org/html/rfc5849>
 Copyright 2011 Christopher Hicks.
 
 This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
+under the terms of either: the GNU General Public License 2.0 as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.

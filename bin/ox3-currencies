@@ -1,0 +1,88 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+ox3-currencies - list or search valid currencies
+
+=head1 SYNOPSIS
+
+This code is primarily intended to provide an example of how to use the authentication and API wrapping portions of OX::OAauth.  But you may also find it handy.
+
+If you run the script with an argument it will use that as a regex search.   
+
+=head1 CONFIGURATION
+
+Create a json file with the require paramaters for the API.  Save it as L<~/.ox3auth> or set the L<OX3AUTH> environment variable to point to your file.
+
+For example:
+	{ api_url: 'https://prod-console.openx.com/ox/3.0', sso_url: 'https://sso.openx.com/', realm: 'blah_blah_blah', email: 'you@your.com', password: 'sneaky', api_key: 'ffffffffffffffffffffffffffffffffffffffff', api_secret: 'ffffffffffffffffffffffffffffffffffffffff' }
+
+=head1 SEE ALSO
+
+L<OX::OAuth>
+
+=cut
+
+use warnings;
+use strict;
+
+use Data::Dumper;
+use JSON -support_by_pp;
+use File::Slurp;
+use OX::OAuth;
+
+# internal config
+my $verbose = 0;
+
+# command line arguments
+my ($search) = @ARGV;
+
+# config from file
+my $configfile = $ENV{OX3AUTH} || $ENV{HOME} . '/.ox3auth';
+my $config = jsondecode(read_file($configfile));
+#jsondump(read_file($configfile));
+
+my $oauth = OX::OAuth->new($config); # create oauth object based on config file parameters
+if ($oauth->login($verbose)) { # attempt to login
+	my $token = $oauth->token;
+	# do something with $token
+	print "your ox3 token is $token, " if $verbose;
+	print "logged in....\n" if $verbose;
+} else {
+	die $oauth->error; # failure
+}
+
+my $currencies = $oauth->rest({
+	relative_url => "/a/account/currencyOptions",
+	quiet => 1-$verbose,
+});
+
+foreach my $entry (@$currencies) {
+	if (defined $search and $entry->{name} !~ /$search/i) {
+		# it doesn't fit, too bad
+		next;
+	}
+	print join("\t",$entry->{id},$entry->{name}), "\n";
+}
+
+## 
+## SUBroutines
+##
+
+# decode JSON into perl structure
+sub jsondecode {
+	my ($content) = @_;
+#	print "### $content\n";
+	my $json = new JSON;
+	my $json_text = $json->allow_nonref->utf8->relaxed->escape_slash->loose->allow_singlequote->allow_barekey->decode($content);
+	return $json_text;
+}
+
+# turn JSON into human readable output
+sub jsondump {
+	my($content) = @_;
+	my $json_text = jsondecode($content);
+	print Dumper($json_text);
+}
+
+__END__
