@@ -19,11 +19,11 @@ OX::OAuth - use OpenX's OAuth login mechanism
 
 =head1 VERSION
 
-Version 0.60
+Version 0.61
 
 =cut
 
-our $VERSION = '0.60';
+our $VERSION = '0.61';
 
 
 =head1 SYNOPSIS
@@ -437,6 +437,10 @@ Optional.  If you're uploading a file, which file?
 
 Optional.  The name of the field to put the uploaded file in.
 
+=item * retry
+
+Optional.  The number of times to retry an operation.  The default is 0 retries.  Each retry will exponentially back off starting at 2 seconds, then 4, 8, 16, etc.
+
 =back
 
 =cut
@@ -453,7 +457,7 @@ sub rest {
 	my $url;
 	if ($args->{url}) {
 		# go with the explicit url
-		$url = $self->{url};
+		$url = $args->{url};
 	} elsif ($args->{relative_url}) {
 		$url = $self->{api_url} . $args->{relative_url};
 	} else {
@@ -466,6 +470,8 @@ sub rest {
 	my $method = $args->{method};
 	my $debug = $args->{debug} || 0;
 	my $quiet = $args->{quiet} || 0;
+	my $retry = $args->{retry} || 0;
+	$retry++; # try at least once
 
 	my $decode_json = 1;
 	$decode_json = $args->{decode_json} if defined $args->{decode_json};
@@ -474,59 +480,80 @@ sub rest {
 	my $upload_file_field = $args->{upload_file_field};
 
 	# web hit
+	my $retry_delay = 2;
 	my $response;
-	if (defined $upload_file) {
-		die "no field name" unless length $upload_file_field;
-		die "no file name" unless length $upload_file;
-		die "file '$upload_file' does not exist" unless -f $upload_file;
-		$response = $ua->post($url,
-			Content_Type => 'form-data',
-			Content => [
-				%$post_args,
-				$upload_file_field => [ $upload_file ],
-			]
-		);
-	} elsif (defined $method) {
-		if ($method eq 'PUT') {
-			$response = $ua->request(PUT $url);
-		} elsif ($method eq 'DELETE') {
-			$response = $ua->request(DELETE $url);
-		} # TODO: more options?
-	} elsif (defined $post_args) {
-		$response = $ua->post($url,$post_args);
-	} else {
-		$response = $ua->get($url);
-	}
-
-	# how did it go?
-	if ($response->is_success) { # TODO: log this as well
-		my $content = $response->content;
-
-		if ($debug) {
-			print "$success\n";
-			print "sent: " . Dumper($post_args) . "\n";
-			jsondump($content);
-			die "debug";
-		}
-		my $href;
-		if ($decode_json) {
-			$href = jsondecode($content);
+	while ($retry) {
+		if (defined $upload_file) {
+			die "no field name" unless length $upload_file_field;
+			die "no file name" unless length $upload_file;
+			die "file '$upload_file' does not exist" unless -f $upload_file;
+			$response = $ua->post($url,
+				Content_Type => 'form-data',
+				Content => [
+					%$post_args,
+					$upload_file_field => [ $upload_file ],
+				]
+			);
+		} elsif (defined $method) {
+			if ($method eq 'PUT') {
+				$response = $ua->request(PUT $url);
+			} elsif ($method eq 'DELETE') {
+				$response = $ua->request(DELETE $url);
+			} # TODO: more options?
+		} elsif (defined $post_args) {
+			$response = $ua->post($url,$post_args);
 		} else {
-			$href = {
-				content => $content,
-				status_line => $response->status_line,
-			}
+			$response = $ua->get($url);
 		}
-		unless ($quiet) {
-			if ( ref($href) eq 'HASH' and defined $href->{id} ) {
-				print "$success id " . $href->{id} . "\n";
-			} else {
+
+		# we tried
+		$retry--;
+
+		# how did it go?
+		if ($response->is_success) { # TODO: log this as well
+			my $content = $response->content;
+
+			if ($debug) {
 				print "$success\n";
+				print "sent: " . Dumper($post_args) . "\n";
+				jsondump($content);
+				die "debug";
+			}
+			my $href;
+			if ($decode_json) {
+				$href = jsondecode($content);
+			} else {
+				$href = {
+					content => $content,
+					status_line => $response->status_line,
+				}
+			}
+			unless ($quiet) {
+				if ( ref($href) eq 'HASH' and defined $href->{id} ) {
+					print "$success id " . $href->{id} . "\n";
+				} else {
+					print "$success\n";
+				}
+			}
+			return $href;
+		} else {
+			my $fail_message = "$url failed: " . $response->status_line . "\n" . $response->content;
+			if (defined $post_args) {
+				$fail_message .= "\nsent:" . Dumper($post_args);
+			} else {
+				$fail_message .= "\nsent _NO_ POST parameters\n";
+			}
+
+			if ($retry) {
+				warn $fail_message;
+				warn "sleeping $retry_delay seconds before trying again ($retry retries left)...\n\n";
+				sleep($retry_delay);
+				$retry_delay = $retry_delay * $retry_delay; # exponential back off
+			} else {
+				# no more retries
+				die $fail_message;
 			}
 		}
-		return $href;
-	} else {
-		die "$url failed: " . $response->status_line . "\n" . $response->content . "\nsent:" . Dumper($post_args);
 	}
 }
 

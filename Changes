@@ -1,5 +1,9 @@
 Revision history for OX-OAuth
 
+0.61	14 Sept 2011 11:58 PST
+- add retry to rest()
+- fix url argument to rest() so it actually works
+
 0.60	5 Sept 2011 20:04 PST
 - fix Changes for 0.52
 - better pod.  well, at least more pod.
