@@ -28,7 +28,6 @@ use strict;
 
 use Data::Dumper;
 use JSON -support_by_pp;
-use File::Slurp;
 use OX::OAuth;
 
 # internal config
@@ -38,9 +37,7 @@ my $verbose = 0;
 my ($search) = @ARGV;
 
 # config from file
-my $configfile = $ENV{OX3AUTH} || $ENV{HOME} . '/.ox3auth';
-my $config = jsondecode(read_file($configfile));
-#jsondump(read_file($configfile));
+my $config = OX::OAuth->find_config();
 
 my $oauth = OX::OAuth->new($config); # create oauth object based on config file parameters
 if ($oauth->login($verbose)) { # attempt to login

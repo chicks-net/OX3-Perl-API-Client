@@ -12,6 +12,7 @@ $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A; # requires ca
 use HTTP::Request::Common;
 use JSON -support_by_pp;
 use Sub::Override;
+use File::Slurp;
 
 =head1 NAME
 
@@ -19,11 +20,11 @@ OX::OAuth - use OpenX's OAuth login mechanism
 
 =head1 VERSION
 
-Version 0.61
+Version 0.62
 
 =cut
 
-our $VERSION = '0.61';
+our $VERSION = '0.62';
 
 
 =head1 SYNOPSIS
@@ -350,6 +351,46 @@ sub nonce {
 	}
 
 	$nonce;
+}
+
+=head2 find_config
+
+This will retrieve a config file for you.  The config file format is json and the json is decoded and a reference returned.  It looks for a config in:
+
+=over 4
+
+=item * the file specified by the environment variable OX3AUTH
+
+=item * a file in /etc/ox/oauth/${env}.json
+
+=item * the file $HOME/~.ox3auth
+
+=back
+
+The only argument is the environment which is optional.  "qa" is the default environment.
+
+=cut
+
+sub find_config {
+	my $env = shift || 'qa';
+
+	my $canonical_filename = "/etc/ox/oauth/${env}.json";
+	my $config_filename;
+	if (defined $ENV{OX3AUTH}) {
+		$config_filename = $ENV{OX3AUTH};
+	} elsif ( -e $canonical_filename )  {
+		$config_filename = $canonical_filename;
+	} elsif ( -e ($ENV{HOME} . '/.ox3auth') ) {
+		$config_filename = $ENV{HOME} . '/.ox3auth';
+	} else {
+		die "no potential config files found, so giving up";
+	}
+
+	unless (-r $config_filename) {
+		die "cannot read $config_filename";
+	}
+
+	return jsondecode(read_file($config_filename));
 }
 
 =head2 token

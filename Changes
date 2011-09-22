@@ -1,5 +1,8 @@
 Revision history for OX-OAuth
 
+0.62	22 Sept 2011 01:02 PST
+- add find_config() method - close to likely standard
+
 0.61	14 Sept 2011 11:58 PST
 - add retry to rest()
 - fix url argument to rest() so it actually works

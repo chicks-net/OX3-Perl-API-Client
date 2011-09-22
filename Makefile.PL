@@ -19,6 +19,7 @@ WriteMakefile(
         'HTTP::Request::Common' => 0,
         'Sub::Override' => 0,
         'LWP::UserAgent' => 0,
+        'File::Slurp' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'OX-OAuth-*' },
