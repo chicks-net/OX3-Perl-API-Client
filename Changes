@@ -1,5 +1,10 @@
 Revision history for OX-OAuth
 
+0.63	22 Sept 2011 15:22 PST
+- improved tests
+- pod tweaks
+- rewritten README
+
 0.62	22 Sept 2011 01:02 PST
 - add find_config() method - close to likely standard
 

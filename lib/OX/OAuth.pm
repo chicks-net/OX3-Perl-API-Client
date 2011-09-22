@@ -20,11 +20,11 @@ OX::OAuth - use OpenX's OAuth login mechanism
 
 =head1 VERSION
 
-Version 0.62
+Version 0.63
 
 =cut
 
-our $VERSION = '0.62';
+our $VERSION = '0.63';
 
 
 =head1 SYNOPSIS
@@ -661,9 +661,9 @@ L<JSON>
 
 =over 4
 
-=item * Keith Miller, our OAuth implementor
+=item * Keith Miller, OpenX's OAuth implementor
 
-=item * Michael Todd, Operations Manager
+=item * Michael Todd, OpenX Operations Manager
 
 =back
 
