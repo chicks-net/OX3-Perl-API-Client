@@ -598,6 +598,16 @@ sub rest {
 	}
 }
 
+=head1 FUTURE
+
+=over 4
+
+=item * caching of token and other cookies across script invocations
+
+=item * tweaking UserAgent header
+
+=back
+
 =head1 AUTHOR
 
 Christopher Hicks, C<< <chris.hicks at openx.org> >>
