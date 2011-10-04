@@ -16,35 +16,40 @@ use File::Slurp;
 
 =head1 NAME
 
-OX::OAuth - use OpenX's OAuth login mechanism
+OX::OAuth - use OpenX's OAuth login mechanism and rest API
 
 =head1 VERSION
 
-Version 0.66
+Version 0.67
 
 =cut
 
-our $VERSION = '0.66';
+our $VERSION = '0.67';
 
 
 =head1 SYNOPSIS
 
-This encapsulates the ugly OAuth process so you can pass in paramaters and get out the token of your dreams.
+This encapsulates the ugly multi-step OAuth process so you can pass in paramaters and get out the token of your dreams.
 
 For example:
 
     use OX::OAuth;
 
-    $config = {
+    # hard-code config
+    my $hardcode_config = {
 	api_url => 'https://prod-console.openx.com/ox/3.0',
 	sso_url => 'https://sso.openx.com/'
 	realm => 'blah_ad_server',
 	email => 'you@your.dom',
 	password => 'secret',
     };
+	
+    # or read it from a json file
+    my $prod_config = OX::OAuth->find_config('prod');
 
-    my $oauth = OX::OAuth->new($config);
-    if ($oauth->login) {
+    my $verbose = 1;
+    my $oauth = OX::OAuth->new($prod_config);
+    if ($oauth->login($verbose)) {
        my $token = $oauth->token;
        # do something with $token
     } else {
@@ -635,6 +640,10 @@ You can find documentation for this module with the perldoc command.
 You can also look for information at:
 
 =over 4
+
+=item * L<OX::OAuth> github repo
+
+L<https://github.com/chicks-net/OX-OAuth>
 
 =item * RT: CPAN's request tracker
 

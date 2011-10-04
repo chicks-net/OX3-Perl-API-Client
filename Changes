@@ -1,5 +1,9 @@
 Revision History for OX-OAuth
 
+0.67	3 Oct 2011 19:36 PDT
+- add github URL
+- better pod SYNOPSIS
+
 0.66	3 Oct 2011 19:24 PDT
 - actually update version number this time
 - die if rest() is called before login() despite this not being strictly required
