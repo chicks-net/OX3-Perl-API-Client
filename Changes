@@ -1,6 +1,11 @@
 Revision History for OX-OAuth
 
-0.65   3 Oct 2011 18:25 PDT
+0.66	3 Oct 2011 19:24 PDT
+- actually update version number this time
+- die if rest() is called before login() despite this not being strictly required
+- reorder test so it actually works
+
+0.65	3 Oct 2011 18:25 PDT
 - spec files for rpm building
 - better fix for jsondecode() - now it is always called oop-style
 - all methods now expect to be called oop-style

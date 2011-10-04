@@ -20,11 +20,11 @@ OX::OAuth - use OpenX's OAuth login mechanism
 
 =head1 VERSION
 
-Version 0.64
+Version 0.66
 
 =cut
 
-our $VERSION = '0.64';
+our $VERSION = '0.66';
 
 
 =head1 SYNOPSIS
@@ -495,7 +495,7 @@ sub rest {
 	my $args = shift;
 
 	# reflect on self
-	my $ua = $self->{_ua};
+	my $ua = $self->{_ua} || die "no ua";
 #	my $token = $self->{token};
 
 	# read arguments

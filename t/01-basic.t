@@ -4,8 +4,8 @@
 use warnings;
 use strict;
 
-#use Test::More tests => 1;
-use Test::More qw(no_plan);
+use Test::More tests => 7;
+#use Test::More qw(no_plan);
 #use Data::Dumper;
 
 #BEGIN {
@@ -41,16 +41,16 @@ SKIP: {
 	ok( $oauth, 'new oauth object' );
 	isa_ok( $oauth, "OX::OAuth" );
 
+	my $login_ret = $oauth->login();
+	ok( $login_ret, 'log in' );
+
+	ok( $oauth->token, 'get token');
+
 	my $timezones = $oauth->rest({
 		relative_url => "/a/account/timezoneOptions",
 		quiet => 1,
 	});
 	ok( $timezones, 'get timezones');
-
-	my $login_ret = $oauth->login();
-	ok( $login_ret, 'log in' );
-
-	ok( $oauth->token, 'get token');
 }
 
 __END__
