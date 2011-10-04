@@ -28,7 +28,6 @@ use warnings;
 use strict;
 
 use Data::Dumper;
-use JSON -support_by_pp;
 use OX::OAuth;
 
 # internal config
@@ -62,26 +61,6 @@ foreach my $entry (@$timezones) {
 	}
 	#print join("\t",$entry->{id},$entry->{name},$entry->{code}), "\n";		# simple
 	printf ("%4d %-40s %-40s\n",$entry->{id},$entry->{name},$entry->{code});	# pretty
-}
-
-## 
-## SUBroutines
-##
-
-# decode JSON into perl structure
-sub jsondecode {
-	my ($content) = @_;
-#	print "### $content\n";
-	my $json = new JSON;
-	my $json_text = $json->allow_nonref->utf8->relaxed->escape_slash->loose->allow_singlequote->allow_barekey->decode($content);
-	return $json_text;
-}
-
-# turn JSON into human readable output
-sub jsondump {
-	my($content) = @_;
-	my $json_text = jsondecode($content);
-	print Dumper($json_text);
 }
 
 __END__

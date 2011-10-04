@@ -1,29 +1,41 @@
-Revision history for OX-OAuth
+Revision History for OX-OAuth
 
-0.63	22 Sept 2011 15:22 PST
+0.65   3 Oct 2011 18:25 PDT
+- spec files for rpm building
+- better fix for jsondecode() - now it is always called oop-style
+- all methods now expect to be called oop-style
+- example scripts now cleansed of unused subs (that are provided by the module anyway)
+- ox3-currencies now deals properly with utf8 from db
+
+0.64    29 Sept 2011 17:00 PDT
+- pod tweaks
+- auth json accepts newlines
+- find_config() is compliant with the agreed standard
+
+0.63	22 Sept 2011 15:22 PDT
 - improved tests
 - pod tweaks
 - rewritten README
 
-0.62	22 Sept 2011 01:02 PST
+0.62	22 Sept 2011 01:02 PDT
 - add find_config() method - close to likely standard
 
-0.61	14 Sept 2011 11:58 PST
+0.61	14 Sept 2011 11:58 PDT
 - add retry to rest()
 - fix url argument to rest() so it actually works
 
-0.60	5 Sept 2011 20:04 PST
+0.60	5 Sept 2011 20:04 PDT
 - fix Changes for 0.52
 - better pod.  well, at least more pod.
 - implement ox3-currencies
 - make rest() un-quiet by default
 - make validate call in login() quiet based on verbosity setting
 
-0.52	30 Aug 2011 16:55 PST
+0.52	30 Aug 2011 16:55 PDT
 - allow PUT and DELETE methods in rest()
 - get rid of pasted code after __END__
 
-0.51	30 Aug 2011 15:45 PST
+0.51	30 Aug 2011 15:45 PDT
 - add validate to login()
 - put the cookie header in so things actually work
 

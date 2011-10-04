@@ -25,13 +25,14 @@ L<OX::OAuth>
 
 use warnings;
 use strict;
+use Encode;
 
 use Data::Dumper;
-use JSON -support_by_pp;
 use OX::OAuth;
 
 # internal config
 my $verbose = 0;
+binmode STDOUT, ":utf8";
 
 # command line arguments
 my ($search) = @ARGV;
@@ -59,27 +60,8 @@ foreach my $entry (@$currencies) {
 		# it doesn't fit, too bad
 		next;
 	}
-	print join("\t",$entry->{id},$entry->{name}), "\n";
-}
-
-## 
-## SUBroutines
-##
-
-# decode JSON into perl structure
-sub jsondecode {
-	my ($content) = @_;
-#	print "### $content\n";
-	my $json = new JSON;
-	my $json_text = $json->allow_nonref->utf8->relaxed->escape_slash->loose->allow_singlequote->allow_barekey->decode($content);
-	return $json_text;
-}
-
-# turn JSON into human readable output
-sub jsondump {
-	my($content) = @_;
-	my $json_text = jsondecode($content);
-	print Dumper($json_text);
+	my $name = decode_utf8( $entry->{name} );
+	print join("\t",$entry->{id},$name), "\n";
 }
 
 __END__

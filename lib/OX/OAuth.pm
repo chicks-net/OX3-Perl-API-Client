@@ -20,11 +20,11 @@ OX::OAuth - use OpenX's OAuth login mechanism
 
 =head1 VERSION
 
-Version 0.63
+Version 0.64
 
 =cut
 
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 
 
 =head1 SYNOPSIS
@@ -344,6 +344,7 @@ This calculates and returns a random base62 string 32 characters long.
 =cut
 
 sub nonce {
+#	my $self = shift;
 	my @a = ('A'..'Z', 'a'..'z', 0..9);
 	my $nonce = '';
 	for ( 0 .. 31 ) {
@@ -372,6 +373,7 @@ The only argument is the environment which is optional.  "qa" is the default env
 =cut
 
 sub find_config {
+	my $self = shift;
 	my $env = shift || 'qa';
 
 	my $canonical_filename = "/etc/ox/oauth/${env}.json";
@@ -390,7 +392,7 @@ sub find_config {
 		die "cannot read $config_filename";
 	}
 
-	return jsondecode(read_file($config_filename));
+	return $self->jsondecode(read_file($config_filename));
 }
 
 =head2 token
@@ -411,9 +413,10 @@ decode JSON into perl structure
 =cut
 
 sub jsondecode {
-	my ($content) = @_;
-#	print "### $content\n";
+	my $self = shift;
+	my $content = join('',@_); # merge all the lines
 	my $json = new JSON;
+#	print "### $content\n###\n";
 	my $json_text = $json->allow_nonref->utf8->relaxed->escape_slash->loose->allow_singlequote->allow_barekey->decode($content);
 	return $json_text;
 }
@@ -425,8 +428,9 @@ turn JSON into human readable output and print it out
 =cut
 
 sub jsondump {
-	my($content) = @_;
-	my $json_text = jsondecode($content);
+	my $self = shift;
+	my $content = join('',@_); # merge all the lines
+	my $json_text = $self->jsondecode($content);
 	print Dumper($json_text);
 }
 
@@ -557,12 +561,12 @@ sub rest {
 			if ($debug) {
 				print "$success\n";
 				print "sent: " . Dumper($post_args) . "\n";
-				jsondump($content);
+				$self->jsondump($content);
 				die "debug";
 			}
 			my $href;
 			if ($decode_json) {
-				$href = jsondecode($content);
+				$href = $self->jsondecode($content);
 			} else {
 				$href = {
 					content => $content,
