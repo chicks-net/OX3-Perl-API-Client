@@ -39,7 +39,6 @@ For example:
     my $hardcode_config = {
 	api_url => 'https://prod-console.openx.com/ox/3.0',
 	sso_url => 'https://sso.openx.com/'
-	realm => 'blah_ad_server',
 	email => 'you@your.dom',
 	password => 'secret',
     };
@@ -84,7 +83,7 @@ Required.  Should probably be L<https://sso.openx.com/>
 
 =item * realm
 
-Required.  Provided as part of your Enterprise setup.
+Optional.  Provided as part of your Enterprise setup.
 
 =item * email
 
@@ -132,7 +131,7 @@ sub new {
 	my ($config_errors,@config_errors);
 	if (ref $config eq 'HASH') {
 		# required
-		foreach my $key (qw(api_url sso_url realm email password api_key api_secret)) {
+		foreach my $key (qw(api_url sso_url email password api_key api_secret)) {
 			if (defined $config->{$key}) {
 				$self->{$key} = $config->{$key};
 			} else {
@@ -142,7 +141,7 @@ sub new {
 		}
 
 		# optional
-		foreach my $key (qw(request_token_url access_token_url authorize_url login_url)) {
+		foreach my $key (qw(request_token_url realm access_token_url authorize_url login_url)) {
 			$self->{$key} = $config->{$key};
 		}
 
@@ -225,9 +224,6 @@ sub login {
 		timestamp => time(),
 		nonce => nonce(),
 		callback => $callback,
-		extra_params => {
-			realm => $realm,
-		},
 	);
 
 	$request->sign;
@@ -294,10 +290,6 @@ sub login {
 		signature_method => 'HMAC-SHA1',
 		timestamp => time,
 		nonce => nonce(),
-		realm => $realm, # TODO: try it again with realm in only one place
-		extra_params => {
-			realm => $realm,
-		},
 	);
 
 	#$access_request->allow_extra_params(1);
