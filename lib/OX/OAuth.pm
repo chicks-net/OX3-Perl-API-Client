@@ -11,7 +11,6 @@ use Net::OAuth;
 $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A; # requires callbacks
 use HTTP::Request::Common;
 use JSON -support_by_pp;
-use Sub::Override;
 use File::Slurp;
 
 =head1 NAME
@@ -293,9 +292,6 @@ sub login {
 	);
 
 	#$access_request->allow_extra_params(1);
-	my $override = Sub::Override->new('Net::OAuth::AccessTokenRequest::allow_extra_params',sub {1}); # bru-hahahaha
-	die "bad module" unless $access_request->allow_extra_params; # verify magic
-
 	$access_request->sign;
 
 	die unless $access_request->verify; # double check
@@ -660,10 +656,6 @@ L<http://tools.ietf.org/html/rfc5849>
 =item * Net::OAuth module
 
 L<Net::OAuth> which L<OX::OAuth> is mostly a wrapper for.
-
-=item * Sub::Override module
-
-L<Sub::Override> which made dealing with Net::OAuth I<much> easier.  This module saved me a lot of trouble.
 
 =item * JSON module
 
